@@ -91,7 +91,7 @@ describe("getWhereFilters", function () {
 
     expect(Company.getWhereFilters(filter)).toEqual({
       where: "WHERE name ILIKE $1",
-      pQueries: ["John"]
+      pQueries: ["%John%"]
     });
   });
 
@@ -104,9 +104,9 @@ describe("getWhereFilters", function () {
 
     expect(Company.getWhereFilters(filter)).toEqual({
       where: "WHERE num_employees >= $1 AND num_employees <= $2 AND name ILIKE $3",
-      pQueries: [10, 100, "jobly"]
+      pQueries: [10, 100, "%jobly%"]
     })
-  })
+  });
 });
 
 /************************************** findAll */
@@ -204,6 +204,34 @@ describe("findAll", function () {
       }
     ]);
   });
+  
+  test("works: Company name does not exist. Should return empty array.", async function () {
+    const query = {
+      "name": "Invisible"
+    };
+
+    let companies = await Company.findAll(query);
+
+    expect(companies).toEqual([]);
+  });
+
+  test("works: Filter with partial name", async function () {
+    const query = {
+      "name": "2"
+    };
+
+    let companies = await Company.findAll(query);
+
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      }
+    ]);
+  })
 
   test("fails: invalid search with min greater than max", async function () {
     const query = {
@@ -218,15 +246,6 @@ describe("findAll", function () {
     );
   });
 
-  test("works: Company name does not exist. Should return empty array.", async function () {
-    const query = {
-      "name": "Invisible"
-    };
-
-    let companies = await Company.findAll(query);
-
-    expect(companies).toEqual([])
-  });
 
 
 });

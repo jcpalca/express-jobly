@@ -50,23 +50,32 @@ class Company {
     return company;
   }
 
+  /**
+   * Takes object and extracts minEmployees, maxEmployees, and name values.
+   * Returns 
+   *  - Object
+   *    {where: "WHERE .....", pQueries: ["company name",....]}
+   *      - "where" key value is a string in form of an SQL query
+   *      - "pQueries" key value is an array of parameterized queries
+   */
+
   static getWhereFilters({ minEmployees, maxEmployees, name}) {
     let whereNames = [];
     let pQueries = [];
 
     if(minEmployees) {
-      pQueries.push(minEmployees)
-      whereNames.push(`num_employees >= $${pQueries.length}`)
+      pQueries.push(minEmployees);
+      whereNames.push(`num_employees >= $${pQueries.length}`);
     }
 
     if(maxEmployees) {
-      pQueries.push(maxEmployees)
-      whereNames.push(`num_employees <= $${pQueries.length}`)
+      pQueries.push(maxEmployees);
+      whereNames.push(`num_employees <= $${pQueries.length}`);
     }
 
     if(name) {
-      pQueries.push(name)
-      whereNames.push(`name ILIKE $${pQueries.length}`)
+      pQueries.push(`%${name}%`);
+      whereNames.push(`name ILIKE $${pQueries.length}`);
     }
 
     const where = whereNames.length > 0
@@ -76,11 +85,13 @@ class Company {
     return { where, pQueries }
   }
 
-  /** Find all companies.
+  /** Find all companies based on filters.
+   * Takes input of an object query. Default is an empty object as query. 
+   * Passes the query object data to the class method getWhereFilters. 
+   * Makes a SQL query
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
-//TODO: change docstring
 
   static async findAll(query = {}) {
     const { minEmployees, maxEmployees, name } = query;

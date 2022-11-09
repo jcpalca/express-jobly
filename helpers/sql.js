@@ -33,9 +33,3 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
 module.exports = { sqlForPartialUpdate };
 
-/*
-{
-  setCols: '"name"=$1, "description"=$2, "num_employees"=$3, "logo_url"=$4',
-  values: [ 'New', 'New Description', 10, 'http://new.img' ]
-}
-*/
