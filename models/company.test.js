@@ -56,6 +56,59 @@ describe("create", function () {
   });
 });
 
+/************************************** getWhereFilters */
+
+describe("getWhereFilters", function () {
+  test("works: no filter", async function () {
+    const filter = {};
+
+    expect(Company.getWhereFilters(filter)).toEqual({
+      where: "",
+      pQueries: []
+    });
+  });
+
+  test("works: minEmployees filter", async function () {
+    const filter = {minEmployees: 3};
+
+    expect(Company.getWhereFilters(filter)).toEqual({
+      where: "WHERE num_employees >= $1",
+      pQueries: [3]
+    });
+  });
+
+  test("works: maxEmployees filter", async function () {
+    const filter = {maxEmployees: 50};
+
+    expect(Company.getWhereFilters(filter)).toEqual({
+      where: "WHERE num_employees <= $1",
+      pQueries: [50]
+    });
+  });
+
+  test("works: name filter", async function () {
+    const filter = {name: "John"};
+
+    expect(Company.getWhereFilters(filter)).toEqual({
+      where: "WHERE name ILIKE $1",
+      pQueries: ["John"]
+    });
+  });
+
+  test("works: all filters", async function () {
+    const filter = {
+      minEmployees: 10,
+      maxEmployees: 100,
+      name: "jobly"
+    }
+
+    expect(Company.getWhereFilters(filter)).toEqual({
+      where: "WHERE num_employees >= $1 AND num_employees <= $2 AND name ILIKE $3",
+      pQueries: [10, 100, "jobly"]
+    })
+  })
+});
+
 /************************************** findAll */
 
 describe("findAll", function () {
@@ -87,10 +140,10 @@ describe("findAll", function () {
   });
 
   /******************************************* findALL Filter Test */
-  
+
   test("works: with filter of all choices", async function () {
-    const query = { 
-      "name": "c1", 
+    const query = {
+      "name": "c1",
       "minEmployees": 1,
       "maxEmployees": 2,
     };
@@ -109,7 +162,7 @@ describe("findAll", function () {
   });
 
   test("works: filter by name", async function () {
-    const query = { 
+    const query = {
       "name": "c2"
     };
 
@@ -127,7 +180,7 @@ describe("findAll", function () {
   });
 
   test("works: filter by employee count", async function () {
-    const query = { 
+    const query = {
       "minEmployees": 1,
       "maxEmployees": 2,
     };
@@ -153,19 +206,20 @@ describe("findAll", function () {
   });
 
   test("fails: invalid search with min greater than max", async function () {
-    const query = { 
+    const query = {
       "minEmployees": 4,
       "maxEmployees": 2,
     };
 
     expect(
       async () => await Company.findAll(query))
-        .toThrow(new BadRequestError("minEmployees cannot be higher than maxEmployees")
+        .rejects
+        .toThrow(new BadRequestError("minEmployees cannot be higher than max")
     );
   });
 
   test("works: Company name does not exist. Should return empty array.", async function () {
-    const query = { 
+    const query = {
       "name": "Invisible"
     };
 

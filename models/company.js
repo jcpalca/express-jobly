@@ -50,20 +50,50 @@ class Company {
     return company;
   }
 
+  static getWhereFilters({ minEmployees, maxEmployees, name}) {
+    let whereNames = [];
+    let pQueries = [];
+
+    if(minEmployees) {
+      pQueries.push(minEmployees)
+      whereNames.push(`num_employees >= $${pQueries.length}`)
+    }
+
+    if(maxEmployees) {
+      pQueries.push(maxEmployees)
+      whereNames.push(`num_employees <= $${pQueries.length}`)
+    }
+
+    if(name) {
+      pQueries.push(name)
+      whereNames.push(`name ILIKE $${pQueries.length}`)
+    }
+
+    const where = whereNames.length > 0
+      ? `WHERE ${whereNames.join(" AND ")}`
+      : "";
+
+    return { where, pQueries }
+  }
+
   /** Find all companies.
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 //TODO: change docstring
 
-  static async findAll(query) {
-    const { name, minEmployees, maxEmployees } = query;
-    console.log(query, "<<<<<<<<<<<Query");
-    if(minEmployees > maxEmployees) throw new BadRequestError();
-    
-    // if(query){
-    //   const str = ""
-    // }
+  static async findAll(query = {}) {
+    const { minEmployees, maxEmployees, name } = query;
+
+    console.log(query);
+
+    if(minEmployees > maxEmployees) {
+      throw new BadRequestError("minEmployees cannot be higher than max");
+    }
+
+    const { where, pQueries } = this.getWhereFilters(
+      { minEmployees, maxEmployees, name }
+    )
 
     const companiesRes = await db.query(
         `SELECT handle,
@@ -72,7 +102,9 @@ class Company {
                 num_employees AS "numEmployees",
                 logo_url AS "logoUrl"
            FROM companies
-           ORDER BY name`);
+           ${where}
+           ORDER BY name`,
+           pQueries);
     return companiesRes.rows;
   }
 
