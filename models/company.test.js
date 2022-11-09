@@ -85,6 +85,96 @@ describe("findAll", function () {
       },
     ]);
   });
+
+  /******************************************* findALL Filter Test */
+  
+  test("works: with filter of all choices", async function () {
+    const query = { 
+      "name": "c1", 
+      "minEmployees": 1,
+      "maxEmployees": 2,
+    };
+
+    let companies = await Company.findAll(query);
+
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      }
+    ]);
+  });
+
+  test("works: filter by name", async function () {
+    const query = { 
+      "name": "c2"
+    };
+
+    let companies = await Company.findAll(query);
+
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      }
+    ]);
+  });
+
+  test("works: filter by employee count", async function () {
+    const query = { 
+      "minEmployees": 1,
+      "maxEmployees": 2,
+    };
+
+    let companies = await Company.findAll(query);
+
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      }
+    ]);
+  });
+
+  test("fails: invalid search with min greater than max", async function () {
+    const query = { 
+      "minEmployees": 4,
+      "maxEmployees": 2,
+    };
+
+    expect(
+      async () => await Company.findAll(query))
+        .toThrow(new BadRequestError("minEmployees cannot be higher than maxEmployees")
+    );
+  });
+
+  test("works: Company name does not exist. Should return empty array.", async function () {
+    const query = { 
+      "name": "Invisible"
+    };
+
+    let companies = await Company.findAll(query);
+
+    expect(companies).toEqual([])
+  });
+
+
 });
 
 /************************************** get */

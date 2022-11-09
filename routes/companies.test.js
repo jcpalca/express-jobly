@@ -107,7 +107,7 @@ describe("GET /companies", function () {
     expect(resp.statusCode).toEqual(500);
   });
 
-  test("returns filtered companies", async function() {
+  test("returns filtered name and maxEmployees from companies", async function() {
     //Filter companies. Return filtered companies
 
     const resp = await request(app)
@@ -126,7 +126,41 @@ describe("GET /companies", function () {
                       logoUrl: "http://c1.img",
                     }]
       });
-  })
+  });
+
+  test("returns companies filtering all", async function() {
+    const resp = await request(app)
+        .get("/companies")
+        .query({
+          name: "C3",
+          maxEmployees: 3,
+          minEmployees: 2
+        });
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual(
+      {companies : [{
+                      handle: "c3",
+                      name: "C3",
+                      description: "Desc3",
+                      numEmployees: 3,
+                      logoUrl: "http://c3.img",
+                    }]
+    });
+  });
+
+  test("fail filter on getting companies", async function() {
+    const resp = await request(app)
+      .get("/companies")
+      .query({
+        name: "C3",
+        maxEmployees: 2,
+        minEmployees: 6
+      });
+    
+    expect(resp.statusCode).toEqual(400);
+    //Write test to check message returned. 
+  });
+  
 });
 
 /************************************** GET /companies/:handle */

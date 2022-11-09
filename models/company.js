@@ -4,6 +4,7 @@ const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
+
 /** Related functions for companies. */
 
 class Company {
@@ -53,8 +54,17 @@ class Company {
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
+//TODO: change docstring
 
-  static async findAll() {
+  static async findAll(query) {
+    const { name, minEmployees, maxEmployees } = query;
+    console.log(query, "<<<<<<<<<<<Query");
+    if(minEmployees > maxEmployees) throw new BadRequestError();
+    
+    // if(query){
+    //   const str = ""
+    // }
+
     const companiesRes = await db.query(
         `SELECT handle,
                 name,
