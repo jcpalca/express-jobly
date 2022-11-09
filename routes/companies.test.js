@@ -106,6 +106,27 @@ describe("GET /companies", function () {
         .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(500);
   });
+
+  test("returns filtered companies", async function() {
+    //Filter companies. Return filtered companies
+
+    const resp = await request(app)
+        .get("/companies")
+        .query({
+          name: "C1",
+          maxEmployees: 2
+        });
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual(
+      {companies : [{
+                      handle: "c1",
+                      name: "C1",
+                      description: "Desc1",
+                      numEmployees: 1,
+                      logoUrl: "http://c1.img",
+                    }]
+      });
+  })
 });
 
 /************************************** GET /companies/:handle */
