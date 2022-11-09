@@ -1,6 +1,20 @@
+"use strict";
+
 const { BadRequestError } = require("../expressError");
 
-// THIS NEEDS SOME GREAT DOCUMENTATION.
+/**
+ *  Takes in two objects
+ *  - dataToUpdate: Object with updated data from database
+ *  - jsToSql: Object with key as dataToUpdate key
+ *             and value as SQL converted key
+ *
+ *  Returns an object like:
+ *
+ *  {
+ *    setCols: '"first_name"=$1, "age"=$2'
+ *    values: ['Aliya', 32]
+ *  }
+ */
 
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);
@@ -18,3 +32,10 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 }
 
 module.exports = { sqlForPartialUpdate };
+
+/*
+{
+  setCols: '"name"=$1, "description"=$2, "num_employees"=$3, "logo_url"=$4',
+  values: [ 'New', 'New Description', 10, 'http://new.img' ]
+}
+*/

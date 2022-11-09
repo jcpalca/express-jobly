@@ -43,3 +43,6 @@ app.use(function (err, req, res, next) {
 });
 
 module.exports = app;
+
+// Test Token
+// "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkJpZ1doYWxlIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTY2ODAxODgxMH0.1UTzejmrqpXoKPbWy9PtdUMgv4df7yEqVn0k1oXzqlA"
