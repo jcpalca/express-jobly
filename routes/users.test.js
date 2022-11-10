@@ -12,6 +12,7 @@ const {
   commonAfterEach,
   commonAfterAll,
   u1Token,
+  adminToken,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -119,6 +120,13 @@ describe("GET /users", function () {
         .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       users: [
+        {
+          username: "admin",
+          firstName: "adminF",
+          lastName: "adminL",
+          email: "admin@admin.com",
+          isAdmin: true,
+        },
         {
           username: "u1",
           firstName: "U1F",
