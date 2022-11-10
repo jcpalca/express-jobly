@@ -58,40 +58,40 @@ describe("create", function () {
 
 /************************************** getWhereFilters */
 
-describe("getWhereFilters", function () {
+describe("_getWhereFilters", function () {
   test("works: no filter", async function () {
     const filter = {};
 
-    expect(Company.getWhereFilters(filter)).toEqual({
+    expect(Company._getWhereFilters(filter)).toEqual({
       where: "",
-      pQueries: []
+      values: []
     });
   });
 
   test("works: minEmployees filter", async function () {
     const filter = {minEmployees: 3};
 
-    expect(Company.getWhereFilters(filter)).toEqual({
+    expect(Company._getWhereFilters(filter)).toEqual({
       where: "WHERE num_employees >= $1",
-      pQueries: [3]
+      values: [3]
     });
   });
 
   test("works: maxEmployees filter", async function () {
     const filter = {maxEmployees: 50};
 
-    expect(Company.getWhereFilters(filter)).toEqual({
+    expect(Company._getWhereFilters(filter)).toEqual({
       where: "WHERE num_employees <= $1",
-      pQueries: [50]
+      values: [50]
     });
   });
 
   test("works: name filter", async function () {
     const filter = {name: "John"};
 
-    expect(Company.getWhereFilters(filter)).toEqual({
+    expect(Company._getWhereFilters(filter)).toEqual({
       where: "WHERE name ILIKE $1",
-      pQueries: ["%John%"]
+      values: ["%John%"]
     });
   });
 
@@ -102,9 +102,9 @@ describe("getWhereFilters", function () {
       name: "jobly"
     }
 
-    expect(Company.getWhereFilters(filter)).toEqual({
+    expect(Company._getWhereFilters(filter)).toEqual({
       where: "WHERE num_employees >= $1 AND num_employees <= $2 AND name ILIKE $3",
-      pQueries: [10, 100, "%jobly%"]
+      values: [10, 100, "%jobly%"]
     })
   });
 });

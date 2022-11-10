@@ -52,46 +52,55 @@ class Company {
 
   /**
    * Takes object and extracts minEmployees, maxEmployees, and name values.
+   * - Looks like
+   *    - {minEmployees: 14, 
+   *       maxEmployees: 150}
+   * 
    * Returns 
    *  - Object
-   *    {where: "WHERE .....", pQueries: ["company name",....]} //TODO: Be more explicit WHERE
-   *      - "where" key value is a string in form of an SQL query
-   *      - "pQueries" key value is an array of parameterized queries
-   */ //TODO: WHERE Clause for SQL query. Not the full query
-//TODO: shouldnt directly use this method. Not useful for any other case than with findAll() "_"
-  static getWhereFilters({ minEmployees, maxEmployees, name}) {
-    let whereNames = []; //TODO: WhereParts. Multiple parts to a where clause
-    let pQueries = [];
-//TODO: pQueries => vals or values. Actual values like in SQL (VALUES)
+   *    {where: "WHERE num_employees >= $1 AND name ILIKE $2", 
+   *    values: [10, "test"]}
+   *      - "where" key value is the WHERE clause for a SQL query
+   *      - "values" key value is an array of parameterized queries
+   */ 
+
+  static _getWhereFilters({ minEmployees, maxEmployees, name}) {
+    let whereParts = []; 
+    let values = [];
+
     if(minEmployees) {
-      pQueries.push(minEmployees);
-      whereNames.push(`num_employees >= $${pQueries.length}`);
+      values.push(minEmployees);
+      whereParts.push(`num_employees >= $${values.length}`);
     }
 
     if(maxEmployees) {
-      pQueries.push(maxEmployees);
-      whereNames.push(`num_employees <= $${pQueries.length}`);
+      values.push(maxEmployees);
+      whereParts.push(`num_employees <= $${values.length}`);
     }
 
     if(name) {
-      pQueries.push(`%${name}%`);
-      whereNames.push(`name ILIKE $${pQueries.length}`);
+      values.push(`%${name}%`);
+      whereParts.push(`name ILIKE $${values.length}`);
     }
 
-    const where = whereNames.length > 0
-      ? `WHERE ${whereNames.join(" AND ")}`
+    const where = whereParts.length > 0
+      ? `WHERE ${whereParts.join(" AND ")}`
       : "";
 
-    return { where, pQueries }
+    return { where, values }
   }
 
-  /** Find all companies based on filters.
+  /** Find all companies. Filters are optional. 
+   *    - Filter options taken as object in query
+   *       - { minEmployees: 1,
+   *           maxEmployees: 5,
+   *           name: "Happy"
+   *          }
+   * 
    * Takes input of an object query. Default is an empty object as query. 
-   * Passes the query object data to the class method getWhereFilters.  //TODO: What is does only
-   * Makes a SQL query
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
-   * */ //TODO: filters is optional. Specify on what you can filter on. Options to filter
+   */
 
   static async findAll(query = {}) {
     const { minEmployees, maxEmployees, name } = query;
@@ -102,7 +111,7 @@ class Company {
       throw new BadRequestError("minEmployees cannot be higher than max");
     }
 
-    const { where, pQueries } = this.getWhereFilters(
+    const { where, values } = this._getWhereFilters(
       { minEmployees, maxEmployees, name }
     )
 
@@ -115,7 +124,7 @@ class Company {
            FROM companies
            ${where}
            ORDER BY name`,
-           pQueries);
+           values);
     return companiesRes.rows;
   }
 
