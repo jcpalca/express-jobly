@@ -47,24 +47,32 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  * Can filter on provided search filters:
  * - minEmployees
  * - maxEmployees
- * - nameLike (will find case-insensitive, partial matches)
+ * - name (will find case-insensitive, partial matches)
  *
  * Authorization required: none
+ * 
+ * Check if minEmployees or maxEmployee data exists in query, change to Number type
+ * Validate data from req query to the companyFilter Schema. 
  */
 
 router.get("/", async function (req, res, next) {
+  const q = req.query;
+  console.log(q, "<<<<<<<<<<<<<<<<<<Q  ")
+  if(q.minEmployees) q.minEmployees = +q.minEmployees;
+  if(q.maxEmployees) q.maxEmployees = +q.maxEmployees;
+
   const validator = jsonschema.validate(
-    req.body,
+    q,
     companyFilterSchema,
     {required: true}
   );
-  
+
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
     throw new BadRequestError(errs);
   }
 
-  const companies = await Company.findAll(req.query);
+  const companies = await Company.findAll(q);
   return res.json({ companies });
 });
 

@@ -107,6 +107,19 @@ describe("GET /companies", function () {
     expect(resp.statusCode).toEqual(500);
   });
 
+  test("fails: Bad Input", async function() {
+    const resp = await request(app)
+        .get("/companies")
+        .query({
+          minEmployees: -1,
+          maxEmployees: "One"
+        })
+      
+    expect(resp.statusCode).toEqual(400);
+  })
+
+  /******************************************* GET /companies Filters */
+
   test("returns filtered name and maxEmployees from companies", async function() {
     //Filter companies. Return filtered companies
 
@@ -160,7 +173,7 @@ describe("GET /companies", function () {
     expect(resp.statusCode).toEqual(400);
     //Write test to check message returned. 
   });
-  
+
 });
 
 /************************************** GET /companies/:handle */

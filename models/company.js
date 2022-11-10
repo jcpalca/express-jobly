@@ -54,15 +54,15 @@ class Company {
    * Takes object and extracts minEmployees, maxEmployees, and name values.
    * Returns 
    *  - Object
-   *    {where: "WHERE .....", pQueries: ["company name",....]}
+   *    {where: "WHERE .....", pQueries: ["company name",....]} //TODO: Be more explicit WHERE
    *      - "where" key value is a string in form of an SQL query
    *      - "pQueries" key value is an array of parameterized queries
-   */
-
+   */ //TODO: WHERE Clause for SQL query. Not the full query
+//TODO: shouldnt directly use this method. Not useful for any other case than with findAll() "_"
   static getWhereFilters({ minEmployees, maxEmployees, name}) {
-    let whereNames = [];
+    let whereNames = []; //TODO: WhereParts. Multiple parts to a where clause
     let pQueries = [];
-
+//TODO: pQueries => vals or values. Actual values like in SQL (VALUES)
     if(minEmployees) {
       pQueries.push(minEmployees);
       whereNames.push(`num_employees >= $${pQueries.length}`);
@@ -87,11 +87,11 @@ class Company {
 
   /** Find all companies based on filters.
    * Takes input of an object query. Default is an empty object as query. 
-   * Passes the query object data to the class method getWhereFilters. 
+   * Passes the query object data to the class method getWhereFilters.  //TODO: What is does only
    * Makes a SQL query
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
-   * */
+   * */ //TODO: filters is optional. Specify on what you can filter on. Options to filter
 
   static async findAll(query = {}) {
     const { minEmployees, maxEmployees, name } = query;
@@ -158,6 +158,7 @@ class Company {
    */
 
   static async update(handle, data) {
+    console.log(data, "<<<<<<<data")
     const { setCols, values } = sqlForPartialUpdate(
         data,
         {
