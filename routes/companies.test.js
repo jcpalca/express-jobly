@@ -12,6 +12,7 @@ const {
   commonAfterAll,
   u1Token,
   adminToken,
+  jobIds,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -197,10 +198,19 @@ describe("GET /companies/:handle", function () {
         description: "Desc1",
         numEmployees: 1,
         logoUrl: "http://c1.img",
+        jobs: [
+          {
+            id: jobIds[0],
+            title: "j1",
+            salary: 10000,
+            equity: "0.1"
+          }
+        ]
       },
     });
   });
 
+  // FIXME: fix test for company w/o job
   test("works for anon: company w/o jobs", async function () {
     const resp = await request(app).get(`/companies/c2`);
     expect(resp.body).toEqual({
@@ -210,6 +220,14 @@ describe("GET /companies/:handle", function () {
         description: "Desc2",
         numEmployees: 2,
         logoUrl: "http://c2.img",
+        jobs: [
+          {
+            id: jobIds[1],
+            title: "j2",
+            salary: 20000,
+            equity: "0.2"
+          }
+        ]
       },
     });
   });

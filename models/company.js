@@ -53,19 +53,19 @@ class Company {
   /**
    * Takes object and extracts minEmployees, maxEmployees, and name values.
    * - Looks like
-   *    - {minEmployees: 14, 
+   *    - {minEmployees: 14,
    *       maxEmployees: 150}
-   * 
-   * Returns 
+   *
+   * Returns
    *  - Object
-   *    {where: "WHERE num_employees >= $1 AND name ILIKE $2", 
+   *    {where: "WHERE num_employees >= $1 AND name ILIKE $2",
    *    values: [10, "test"]}
    *      - "where" key value is the WHERE clause for a SQL query
    *      - "values" key value is an array of parameterized queries
-   */ 
+   */
 
   static _getWhereFilters({ minEmployees, maxEmployees, name}) {
-    let whereParts = []; 
+    let whereParts = [];
     let values = [];
 
     if(minEmployees) {
@@ -90,14 +90,14 @@ class Company {
     return { where, values }
   }
 
-  /** Find all companies. Filters are optional. 
+  /** Find all companies. Filters are optional.
    *    - Filter options taken as object in query
    *       - { minEmployees: 1,
    *           maxEmployees: 5,
    *           name: "Happy"
    *          }
-   * 
-   * Takes input of an object query. Default is an empty object as query. 
+   *
+   * Takes input of an object query. Default is an empty object as query.
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    */
@@ -150,6 +150,15 @@ class Company {
     const company = companyRes.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
+
+    const jobRes = await db.query(
+        `SELECT id, title, salary, equity
+            FROM jobs
+            WHERE company_handle = $1`,
+            [handle]
+    );
+
+    company.jobs = jobRes.rows;
 
     return company;
   }

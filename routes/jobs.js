@@ -10,7 +10,7 @@ const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
-// const jobUpdateSchema = require("../schemas/jobUpdate.json");
+const jobUpdateSchema = require("../schemas/jobUpdate.json");
 const jobFilterSchema = require("../schemas/jobFilter.json");
 const db = require("../db");
 
@@ -19,13 +19,11 @@ const router = new express.Router();
 
 /** POST / { job } =>  { job }
  *
- * job should be { handle, name, description, numEmployees, logoUrl }
+ * job should be { title, salary, equity, companyHandle }
  *
- * Returns { handle, name, description, numEmployees, logoUrl }
+ * Returns { id, title, salary, equity, companyHandle }
  *
  * Authorization required: login and ensure user is Admin
- * 
- * //   "pattern" : "0+([.][0-9]+)?|1([.]0)?" regex in Schema New 
  */
 
 router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
@@ -51,11 +49,12 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
  * Can filter on provided search filters:
  * - salary
  * - title (will find case-insensitive, partial matches)
- * - hasEquity 
+ * - hasEquity
  *
  * Authorization required: none
  *
- * Check if salary data exists in query, change to Number type
+ * Check if minSalary data exists in query, change to Number type
+ * Check if hasEquity data exists in query, change to Boolean type
  * Validate data from req query to the jobFilter Schema.
  */
 
@@ -92,21 +91,21 @@ router.get("/:id", async function (req, res, next) {
   return res.json({ job });
 });
 
-/** PATCH /[handle] { fld1, fld2, ... } => { job }
+/** PATCH /[id] { fld1, fld2, ... } => { job }
  *
  * Patches job data.
  *
- * fields can be: { name, description, numEmployees, logo_url }
+ * fields can be: { title, salary, equity }
  *
- * Returns { handle, name, description, numEmployees, logo_url }
+ * Returns { id, title, salary, equity, companyHandle }
  *
  * Authorization required: login and ensure user is Admin
  */
 
-router.patch("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+router.patch("/:id", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(
     req.body,
-    companyUpdateSchema,
+    jobUpdateSchema,
     {required:true}
   );
   if (!validator.valid) {
@@ -114,18 +113,19 @@ router.patch("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, 
     throw new BadRequestError(errs);
   }
 
-  const job = await Job.update(req.params.handle, req.body);
+  const job = await Job.update(req.params.id, req.body);
   return res.json({ job });
 });
 
-/** DELETE /[handle]  =>  { deleted: handle }
+/** DELETE /[id]  =>  { deleted: id }
  *
  * Authorization: login and ensure user is Admin
  */
 
-router.delete("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
-  await Job.remove(req.params.handle);
-  return res.json({ deleted: req.params.handle });
+router.delete("/:id", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+  req.params.id = +req.params.id;
+  await Job.remove(req.params.id);
+  return res.json({ deleted: req.params.id });
 });
 
 

@@ -166,6 +166,8 @@ describe("findAll", function () {
     ]);
   });
 
+  // TODO: Move title tests up
+
   test("works: filter by title", async function () {
     const query = {
       "title": "j2"
@@ -315,7 +317,16 @@ describe("get", function () {
 
   test("not found if no such job", async function () {
     try {
-      await Job.get(0);
+      await Job.get(-1);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("not found if no such job: id is a string", async function () {
+    try {
+      await Job.get("nope");
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
@@ -382,7 +393,16 @@ describe("update", function () {
 
   test("not found if no such job", async function () {
     try {
-      await Job.update(0, updateData);
+      await Job.update(-1, updateData);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("not found if no such job: id is a string", async function () {
+    try {
+      await Job.update("nope", updateData);
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
@@ -411,7 +431,16 @@ describe("remove", function () {
 
   test("not found if no such job", async function () {
     try {
-      await Job.remove(0);
+      await Job.remove(-1);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("not found if no such job: id is a string", async function () {
+    try {
+      await Job.remove("nope");
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();

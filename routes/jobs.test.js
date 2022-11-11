@@ -37,7 +37,7 @@ describe("POST /jobs", function () {
         .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual(
-      { job: 
+      { job:
         {
           id: expect.any(Number),
           title: "j4",
@@ -48,13 +48,16 @@ describe("POST /jobs", function () {
       });
   })
 
-  test("not ok for non-admin users", async function () {
+  test("unauth for non-admin users", async function () {
     const resp = await request(app)
         .post("/jobs")
         .send(newJob)
         .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });
+
+  //TODO: add test about nonadmin user making bad request should be unauth
+  //TODO: add test about anon users should be unauth
 
   test("bad request with missing data", async function () {
     const resp = await request(app)
@@ -216,7 +219,7 @@ describe("GET /jobs", function () {
         .query({
           hasEquity: false
         });
-    
+
     console.log(resp.body, "<<<<<<<<<filter hasEquity Test")
     expect(resp.statusCode).toEqual(200);
     expect(resp.body).toEqual(
@@ -265,6 +268,8 @@ describe("GET /jobs", function () {
                     }]
     });
   });
+
+  // TODO: write test about nonexistent filter
 });
 
 /************************************** GET /jobs/:id */
@@ -397,6 +402,8 @@ describe("PATCH /jobs/:id", function () {
         .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(400);
   });
+
+  // TODO: Add tests for unauth users making bad requests
 });
 
 /************************************** DELETE /jobs/:handle */

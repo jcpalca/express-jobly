@@ -8,6 +8,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  jobIds,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -204,7 +205,7 @@ describe("findAll", function () {
       }
     ]);
   });
-  
+
   test("works: Company name does not exist. Should return empty array.", async function () {
     const query = {
       "name": "Invisible"
@@ -261,6 +262,14 @@ describe("get", function () {
       description: "Desc1",
       numEmployees: 1,
       logoUrl: "http://c1.img",
+      jobs: [
+        {
+          id: jobIds[0],
+          title: "j1",
+          salary: 10000,
+          equity: "0.1",
+        }
+      ]
     });
   });
 
