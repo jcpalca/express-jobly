@@ -216,30 +216,34 @@ describe("GET /jobs", function () {
         .query({
           hasEquity: false
         });
+    
+    console.log(resp.body, "<<<<<<<<<filter hasEquity Test")
     expect(resp.statusCode).toEqual(200);
     expect(resp.body).toEqual(
       {jobs:
         [{
-          id: jobIds[0],
-          title: "j1",
-          salary: 10000,
-          equity: "0.1",
-          companyHandle: "c1",
+            id: jobIds[0],
+            title: "j1",
+            salary: 10000,
+            equity: "0.1",
+            companyHandle: "c1",
           },
           {
-          id: jobIds[1],
-          title: "j2",
-          salary: 20000,
-          equity: "0.2",
-          companyHandle: "c2",
+            id: jobIds[1],
+            title: "j2",
+            salary: 20000,
+            equity: "0.2",
+            companyHandle: "c2",
           },
           {
-          id: jobIds[2],
-          title: "j3",
-          salary: 30000,
-          equity: null,
-          companyHandle: "c3",
-          }]});
+            id: jobIds[2],
+            title: "j3",
+            salary: 30000,
+            equity: null,
+            companyHandle: "c3",
+          }
+        ]
+      });
   });
 
   test("returns jobs filtering all", async function() {
@@ -267,7 +271,7 @@ describe("GET /jobs", function () {
 
 describe("GET /jobs/:id", function () {
   test("works for anon", async function () {
-    const resp = await request(app).get(`/jobs/j1`);
+    const resp = await request(app).get(`/jobs/${jobIds[0]}`);
     expect(resp.body).toEqual({
       job: {
         id: jobIds[0],
@@ -293,6 +297,11 @@ describe("GET /jobs/:id", function () {
   // });
 
   test("not found for no such job", async function () {
+    const resp = await request(app).get(`/jobs/0`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("not found for when id is string", async function () {
     const resp = await request(app).get(`/jobs/nope`);
     expect(resp.statusCode).toEqual(404);
   });

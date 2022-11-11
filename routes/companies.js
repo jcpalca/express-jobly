@@ -57,7 +57,7 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   const q = req.query;
-  console.log(q, "<<<<<<<<<<<<<<<<<<Q  ")
+
   if(q.minEmployees) q.minEmployees = +q.minEmployees;
   if(q.maxEmployees) q.maxEmployees = +q.maxEmployees;
 

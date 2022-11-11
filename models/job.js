@@ -81,7 +81,8 @@ class Job {
       whereParts.push(`salary >= $${values.length}`);
     }
 
-    if(hasEquity) {
+
+    if(hasEquity === true) {
       whereParts.push(`equity > 0`);
     }
 
@@ -107,11 +108,12 @@ class Job {
   static async findAll(query = {}) {
     const { title, minSalary, hasEquity } = query;
 
-    console.log(query);
 
     const { where, values } = this._getWhereFilters(
       { title, minSalary, hasEquity }
     )
+    
+    console.log(where, " values:",values, "<<<<<<<<<< getWhereFilters")
 
     const jobsRes = await db.query(
         `SELECT id,
@@ -135,6 +137,8 @@ class Job {
    **/
 
   static async get(id) {
+    if(!+id) throw new NotFoundError(`No job: ${id}`);
+
     const jobRes = await db.query(
         `SELECT id,
                 title,

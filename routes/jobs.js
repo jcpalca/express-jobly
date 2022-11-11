@@ -11,7 +11,7 @@ const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
 // const jobUpdateSchema = require("../schemas/jobUpdate.json");
-// const jobFilterSchema = require("../schemas/jobFilter.json");
+const jobFilterSchema = require("../schemas/jobFilter.json");
 const db = require("../db");
 
 const router = new express.Router();
@@ -36,7 +36,6 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
   );
   if (!validator.valid) {
     const errs = validator.errors.map(e => {
-       console.log(e, "<<<<<<<<<<<< HERE In E");
       e.stack;
     });
     throw new BadRequestError(errs);
@@ -47,50 +46,49 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
 });
 
 /** GET /  =>
- *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
+ *   { jobs: [ { id, title, salary, equity, companyHandle }, ...] }
  *
  * Can filter on provided search filters:
- * - minEmployees
- * - maxEmployees
- * - name (will find case-insensitive, partial matches)
+ * - salary
+ * - title (will find case-insensitive, partial matches)
+ * - hasEquity 
  *
  * Authorization required: none
  *
- * Check if minEmployees or maxEmployee data exists in query, change to Number type
- * Validate data from req query to the companyFilter Schema.
+ * Check if salary data exists in query, change to Number type
+ * Validate data from req query to the jobFilter Schema.
  */
 
 router.get("/", async function (req, res, next) {
   const q = req.query;
-  console.log(q, "<<<<<<<<<<<<<<<<<<Q  ")
-  if(q.minEmployees) q.minEmployees = +q.minEmployees;
-  if(q.maxEmployees) q.maxEmployees = +q.maxEmployees;
+
+  if(q.minSalary) q.minSalary = +q.minSalary;
+  if(q.hasEquity) q.hasEquity = (q.hasEquity === 'true');
 
   const validator = jsonschema.validate(
     q,
-    companyFilterSchema,
+    jobFilterSchema,
     {required: true}
   );
 
   if (!validator.valid) {
-    const errs = validator.errors.map(e => e.stack);
+    const errs = validator.errors.map( e => e.stack );
     throw new BadRequestError(errs);
   }
 
-  const companies = await Job.findAll(q);
-  return res.json({ companies });
+  const jobs = await Job.findAll(q);
+  return res.json({ jobs });
 });
 
-/** GET /[handle]  =>  { job }
+/** GET /[id]  =>  { job }
  *
- *  Job is { handle, name, description, numEmployees, logoUrl, jobs }
- *   where jobs is [{ id, title, salary, equity }, ...]
+ *  Job is { id, title, salary, equity, companyHandle }
  *
  * Authorization required: none
  */
 
-router.get("/:handle", async function (req, res, next) {
-  const job = await Job.get(req.params.handle);
+router.get("/:id", async function (req, res, next) {
+  const job = await Job.get(req.params.id);
   return res.json({ job });
 });
 

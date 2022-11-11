@@ -121,21 +121,21 @@ describe("findAll", function () {
     let jobs = await Job.findAll();
     expect(jobs).toEqual([
       {
-        id: expect.any(Number),
+        id: jobIds[0],
         title: "j1",
         salary: 10000,
         equity: "0.1",
         companyHandle: "c1",
       },
       {
-        id: expect.any(Number),
+        id: jobIds[1],
         title: "j2",
         salary: 20000,
         equity: "0.2",
         companyHandle: "c2",
       },
       {
-        id: expect.any(Number),
+        id: jobIds[2],
         title: "j3",
         salary: 30000,
         equity: null,
@@ -218,14 +218,14 @@ describe("findAll", function () {
 
     expect(jobs).toEqual([
       {
-        id: expect.any(Number),
+        id: jobIds[0],
         title: "j1",
         salary: 10000,
         equity: "0.1",
         companyHandle: "c1",
       },
       {
-        id: expect.any(Number),
+        id: jobIds[1],
         title: "j2",
         salary: 20000,
         equity: "0.2",
@@ -243,21 +243,21 @@ describe("findAll", function () {
 
     expect(jobs).toEqual([
       {
-        id: expect.any(Number),
+        id: jobIds[0],
         title: "j1",
         salary: 10000,
         equity: "0.1",
         companyHandle: "c1",
       },
       {
-        id: expect.any(Number),
+        id: jobIds[1],
         title: "j2",
         salary: 20000,
         equity: "0.2",
         companyHandle: "c2",
       },
       {
-        id: expect.any(Number),
+        id: jobIds[2],
         title: "j3",
         salary: 30000,
         equity: null,
@@ -285,7 +285,7 @@ describe("findAll", function () {
 
     expect(jobs).toEqual([
       {
-        id: expect.any(Number),
+        id: jobIds[1],
         title: "j2",
         salary: 20000,
         equity: "0.2",
