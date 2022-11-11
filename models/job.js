@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
 
@@ -55,34 +55,34 @@ class Job {
   /**
    * Takes object and extracts minEmployees, maxEmployees, and name values.
    * - Looks like
-   *    - {minEmployees: 14,
-   *       maxEmployees: 150}
+   *    - {title: "title",
+   *       minSalary: 1000,
+   *       hasEquity: true }
    *
    * Returns
    *  - Object
-   *    {where: "WHERE num_employees >= $1 AND name ILIKE $2",
-   *    values: [10, "test"]}
+   *    {where: "WHERE title ILIKE $1 AND equity > 0",
+   *    values: ["title"]}
    *      - "where" key value is the WHERE clause for a SQL query
    *      - "values" key value is an array of parameterized queries
    */
 
-  static _getWhereFilters({ minEmployees, maxEmployees, name}) {
+  static _getWhereFilters({ title, minSalary , hasEquity }) {
     let whereParts = [];
     let values = [];
 
-    if(minEmployees) {
-      values.push(minEmployees);
-      whereParts.push(`num_employees >= $${values.length}`);
+    if(title) {
+      values.push(`%${title}%`);
+      whereParts.push(`title ILIKE $${values.length}`);
     }
 
-    if(maxEmployees) {
-      values.push(maxEmployees);
-      whereParts.push(`num_employees <= $${values.length}`);
+    if(minSalary) {
+      values.push(minSalary);
+      whereParts.push(`salary >= $${values.length}`);
     }
 
-    if(name) {
-      values.push(`%${name}%`);
-      whereParts.push(`name ILIKE $${values.length}`);
+    if(hasEquity) {
+      whereParts.push(`equity > 0`);
     }
 
     const where = whereParts.length > 0
@@ -92,68 +92,64 @@ class Job {
     return { where, values }
   }
 
-  /** Find all companies. Filters are optional.
+  /** Find all jobs. Filters are optional.
    *    - Filter options taken as object in query
-   *       - { minEmployees: 1,
-   *           maxEmployees: 5,
-   *           name: "Happy"
+   *       - { title: "title",
+   *           minSalary: 1000,
+   *           hasEquity: true
    *          }
    *
    * Takes input of an object query. Default is an empty object as query.
    *
-   * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   * Returns [{ id, title, salary, equity, companyHandle }, ...]
    */
 
   static async findAll(query = {}) {
-    const { minEmployees, maxEmployees, name } = query;
+    const { title, minSalary, hasEquity } = query;
 
     console.log(query);
 
-    if(minEmployees > maxEmployees) {
-      throw new BadRequestError("minEmployees cannot be higher than max");
-    }
-
     const { where, values } = this._getWhereFilters(
-      { minEmployees, maxEmployees, name }
+      { title, minSalary, hasEquity }
     )
 
-    const companiesRes = await db.query(
-        `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-           FROM companies
+    const jobsRes = await db.query(
+        `SELECT id,
+                title,
+                salary,
+                equity,
+                company_handle AS "companyHandle"
+           FROM jobs
            ${where}
-           ORDER BY name`,
+           ORDER BY id`,
            values);
-    return companiesRes.rows;
+    return jobsRes.rows;
   }
 
-  /** Given a company handle, return data about company.
+  /** Given a job id, return data about job.
    *
-   * Returns { handle, name, description, numEmployees, logoUrl, jobs }
-   *   where jobs is [{ id, title, salary, equity, companyHandle }, ...]
+   * Returns { id, title, salary, equity, companyHandle }
+   *   //where company is [{ handle, name, num_employees, description, logoUrl }, ...]
    *
    * Throws NotFoundError if not found.
    **/
 
-  static async get(handle) {
-    const companyRes = await db.query(
-        `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-           FROM companies
-           WHERE handle = $1`,
-        [handle]);
+  static async get(id) {
+    const jobRes = await db.query(
+        `SELECT id,
+                title,
+                salary,
+                equity,
+                company_handle AS "companyHandle"
+           FROM jobs
+           WHERE id = $1`,
+        [id]);
 
-    const company = companyRes.rows[0];
+    const job = jobRes.rows[0];
 
-    if (!company) throw new NotFoundError(`No company: ${handle}`);
+    if (!job) throw new NotFoundError(`No job: ${id}`);
 
-    return company;
+    return job;
   }
 
   /** Update company data with `data`.
