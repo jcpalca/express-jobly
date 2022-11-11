@@ -45,6 +45,16 @@ async function commonBeforeAll() {
   let resultJobIds = jobsRes.rows.map(r => r.id);
   jobIds.splice(0,0, ...resultJobIds);
 
+  await db.query(`
+        INSERT INTO applications(
+          username,
+          job_id)
+        VALUES ('u1', $1),
+               ('u2', $2)
+        RETURNING username, job_id`, 
+        [ jobIds[0], jobIds[1] ] 
+        );
+
 }
 
 async function commonBeforeEach() {
