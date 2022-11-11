@@ -10,8 +10,8 @@ const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
-const jobUpdateSchema = require("../schemas/jobUpdate.json");
-const jobFilterSchema = require("../schemas/jobFilter.json");
+// const jobUpdateSchema = require("../schemas/jobUpdate.json");
+// const jobFilterSchema = require("../schemas/jobFilter.json");
 const db = require("../db");
 
 const router = new express.Router();
@@ -24,16 +24,21 @@ const router = new express.Router();
  * Returns { handle, name, description, numEmployees, logoUrl }
  *
  * Authorization required: login and ensure user is Admin
+ * 
+ * //   "pattern" : "0+([.][0-9]+)?|1([.]0)?" regex in Schema New 
  */
 
 router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(
     req.body,
-    companyNewSchema,
+    jobNewSchema,
     {required: true}
   );
   if (!validator.valid) {
-    const errs = validator.errors.map(e => e.stack);
+    const errs = validator.errors.map(e => {
+       console.log(e, "<<<<<<<<<<<< HERE In E");
+      e.stack;
+    });
     throw new BadRequestError(errs);
   }
 

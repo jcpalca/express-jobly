@@ -36,9 +36,16 @@ describe("POST /jobs", function () {
         .send(newJob)
         .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(201);
-    expect(resp.body).toEqual({
-      job: newJob,
-    });
+    expect(resp.body).toEqual(
+      { job: 
+        {
+          id: expect.any(Number),
+          title: "j4",
+          salary: 40000,
+          equity: "0.4",
+          companyHandle: "c1",
+        }
+      });
   })
 
   test("not ok for non-admin users", async function () {
