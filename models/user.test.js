@@ -228,3 +228,46 @@ describe("remove", function () {
     }
   });
 });
+
+/************************************** apply */
+//POST /users/:username/jobs/:id
+
+describe("apply", function () {
+  test("apply works", async function() {
+    await User.apply("u3", jobIds[0]);
+    const res = await db.query(
+      `SELECT * FROM applications WHERE job_id = $1`, [jobIds[0]]
+    );
+    expect(res.rows.length).toEqual(2)
+    expect(res.rows).toEqual([
+      {
+        username: "u1",
+        job_id: jobIds[0],
+      },
+      {
+        username: "u3",
+        job_id: jobIds[0],
+      }
+    ]);
+  });
+
+  test("fails when fake user", async function() {
+    try{
+      await User.apply("nope", jobIds[0]);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("fails when job does not exist", async function () {
+    try{
+      await User.apply("u2", -1);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+
+})
