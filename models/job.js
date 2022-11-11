@@ -68,9 +68,8 @@ class Job {
    */
 
   static _getWhereFilters({ title, minSalary, hasEquity }) {
-    // TODO: let => const for mutating arrays
-    let whereParts = [];
-    let values = [];
+    const whereParts = [];
+    const values = [];
 
     if (title) {
       values.push(`%${title}%`);
@@ -133,14 +132,10 @@ class Job {
    * Returns { id, title, salary, equity, companyHandle }
    *   //where company is [{ handle, name, num_employees, description, logoUrl }, ...]
    *
-   * Throws NotFoundError if not found or if id is not a number.
+   * Throws NotFoundError if not found.
    **/
 
-  // TODO: Make bad request errors for nonconvertable ids
-
   static async get(id) {
-    if (!+id) throw new NotFoundError(`No job: ${id}`);
-
     const jobRes = await db.query(
       `SELECT id,
                 title,
@@ -167,13 +162,11 @@ class Job {
    *
    * Returns { id, title, salary, equity }
    *
-   * Throws NotFoundError if not found or if id is not a number.
+   * Throws NotFoundError if not found.
    */
 
   static async update(id, data) {
-    if (!+id) throw new NotFoundError(`No job: ${id}`);
-
-    // TODO: add comment about companyHandle
+    // companyHandle is not updatable
     const { setCols, values } = sqlForPartialUpdate(
       data,
       {});
@@ -194,12 +187,10 @@ class Job {
 
   /** Delete given job from database; returns undefined.
    *
-   * Throws NotFoundError if job not found or if id is not a number.
+   * Throws NotFoundError if job not found.
    **/
 
   static async remove(id) {
-    if (!+id) throw new NotFoundError(`No job: ${id}`);
-
     const result = await db.query(
       `DELETE
            FROM jobs
@@ -214,5 +205,3 @@ class Job {
 
 
 module.exports = Job;
-
-//TODO: Bad request errors go in the route

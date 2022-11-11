@@ -87,6 +87,7 @@ router.get("/", async function (req, res, next) {
  */
 
 router.get("/:id", async function (req, res, next) {
+  if (!+req.params.id) throw new BadRequestError(`Invalid id`);
   const job = await Job.get(req.params.id);
   return res.json({ job });
 });
@@ -103,6 +104,8 @@ router.get("/:id", async function (req, res, next) {
  */
 
 router.patch("/:id", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+  if (!+req.params.id) throw new BadRequestError(`Invalid id`);
+
   const validator = jsonschema.validate(
     req.body,
     jobUpdateSchema,
@@ -123,6 +126,8 @@ router.patch("/:id", ensureLoggedIn, ensureAdmin, async function (req, res, next
  */
 
 router.delete("/:id", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+  if (!+req.params.id) throw new BadRequestError(`Invalid id`);
+
   req.params.id = +req.params.id;
   await Job.remove(req.params.id);
   return res.json({ deleted: req.params.id });

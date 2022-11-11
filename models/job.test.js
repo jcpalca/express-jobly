@@ -166,8 +166,6 @@ describe("findAll", function () {
     ]);
   });
 
-  // TODO: Move title tests up
-
   test("works: filter by title", async function () {
     const query = {
       "title": "j2"
@@ -184,6 +182,34 @@ describe("findAll", function () {
         companyHandle: "c2",
       }
     ]);
+  });
+
+  test("works: Filter with partial title", async function () {
+    const query = {
+      "title": "2"
+    };
+
+    let jobs = await Job.findAll(query);
+
+    expect(jobs).toEqual([
+      {
+        id: jobIds[1],
+        title: "j2",
+        salary: 20000,
+        equity: "0.2",
+        companyHandle: "c2",
+      }
+    ]);
+  });
+
+  test("works: Job title does not exist. Should return empty array.", async function () {
+    const query = {
+      "title": "Invisible"
+    };
+
+    let jobs = await Job.findAll(query);
+
+    expect(jobs).toEqual([]);
   });
 
   test("works: filter by minSalary", async function () {
@@ -267,34 +293,6 @@ describe("findAll", function () {
       }
     ]);
   });
-
-  test("works: Job title does not exist. Should return empty array.", async function () {
-    const query = {
-      "title": "Invisible"
-    };
-
-    let jobs = await Job.findAll(query);
-
-    expect(jobs).toEqual([]);
-  });
-
-  test("works: Filter with partial title", async function () {
-    const query = {
-      "title": "2"
-    };
-
-    let jobs = await Job.findAll(query);
-
-    expect(jobs).toEqual([
-      {
-        id: jobIds[1],
-        title: "j2",
-        salary: 20000,
-        equity: "0.2",
-        companyHandle: "c2",
-      }
-    ]);
-  })
 });
 
 /************************************** get */
@@ -318,15 +316,6 @@ describe("get", function () {
   test("not found if no such job", async function () {
     try {
       await Job.get(-1);
-      throw new Error("fail test, you shouldn't get here");
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-
-  test("not found if no such job: id is a string", async function () {
-    try {
-      await Job.get("nope");
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
@@ -400,15 +389,6 @@ describe("update", function () {
     }
   });
 
-  test("not found if no such job: id is a string", async function () {
-    try {
-      await Job.update("nope", updateData);
-      throw new Error("fail test, you shouldn't get here");
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-
   test("bad request with no data", async function () {
     try {
       await Job.update(jobIds[1], {});
@@ -432,15 +412,6 @@ describe("remove", function () {
   test("not found if no such job", async function () {
     try {
       await Job.remove(-1);
-      throw new Error("fail test, you shouldn't get here");
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-
-  test("not found if no such job: id is a string", async function () {
-    try {
-      await Job.remove("nope");
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();

@@ -65,8 +65,8 @@ class Company {
    */
 
   static _getWhereFilters({ minEmployees, maxEmployees, name}) {
-    let whereParts = [];
-    let values = [];
+    const whereParts = [];
+    const values = [];
 
     if(minEmployees) {
       values.push(minEmployees);

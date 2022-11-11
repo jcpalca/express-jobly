@@ -48,7 +48,7 @@ describe("POST /jobs", function () {
       });
   })
 
-  test("unauth for non-admin users", async function () {
+  test("unauth for non-admin users: valid request", async function () {
     const resp = await request(app)
         .post("/jobs")
         .send(newJob)
@@ -56,8 +56,27 @@ describe("POST /jobs", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  //TODO: add test about nonadmin user making bad request should be unauth
-  //TODO: add test about anon users should be unauth
+  test("unauth for non-admin users: bad request", async function () {
+    const resp = await request(app)
+        .post("/jobs")
+        .send({salary: "a trillion dollars"})
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth for anon: valid request", async function () {
+    const resp = await request(app)
+        .post("/jobs")
+        .send(newJob);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth for anon: bad request", async function () {
+    const resp = await request(app)
+        .post("/jobs")
+        .send({salary: "a trillion dollars"});
+    expect(resp.statusCode).toEqual(401);
+  });
 
   test("bad request with missing data", async function () {
     const resp = await request(app)
@@ -269,7 +288,14 @@ describe("GET /jobs", function () {
     });
   });
 
-  // TODO: write test about nonexistent filter
+  test("throws error with nonexistent filter", async function() {
+    const resp = await request(app)
+        .get("/jobs")
+        .query({
+          nonexistent: true
+        });
+    expect(resp.statusCode).toEqual(400);
+  });
 });
 
 /************************************** GET /jobs/:id */
@@ -288,27 +314,14 @@ describe("GET /jobs/:id", function () {
     });
   });
 
-  // test("works for anon: job w/o jobs", async function () {
-  //   const resp = await request(app).get(`/jobs/j2`);
-  //   expect(resp.body).toEqual({
-  //     job: {
-  //       handle: "c2",
-  //       name: "C2",
-  //       description: "Desc2",
-  //       numEmployees: 2,
-  //       logoUrl: "http://c2.img",
-  //     },
-  //   });
-  // });
-
   test("not found for no such job", async function () {
-    const resp = await request(app).get(`/jobs/0`);
+    const resp = await request(app).get(`/jobs/-1`);
     expect(resp.statusCode).toEqual(404);
   });
 
-  test("not found for when id is string", async function () {
+  test("bad request for when id is string", async function () {
     const resp = await request(app).get(`/jobs/nope`);
-    expect(resp.statusCode).toEqual(404);
+    expect(resp.statusCode).toEqual(400);
   });
 });
 
@@ -355,12 +368,22 @@ describe("PATCH /jobs/:id", function () {
 
   test("not found on no such job for admin", async function () {
     const resp = await request(app)
+        .patch('/jobs/-1')
+        .send({
+          title: "new job",
+        })
+        .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("bad request on id string for admin", async function () {
+    const resp = await request(app)
         .patch('/jobs/nope')
         .send({
           title: "new nope",
         })
         .set("authorization", `Bearer ${adminToken}`);
-    expect(resp.statusCode).toEqual(404);
+    expect(resp.statusCode).toEqual(400);
   });
 
   test("unauth on no such job for non-admin", async function () {
@@ -373,7 +396,7 @@ describe("PATCH /jobs/:id", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("bad request on id change attempt", async function () {
+  test("bad request on id change attempt: admin", async function () {
     const resp = await request(app)
         .patch(`/jobs/${jobIds[0]}`)
         .send({
@@ -383,7 +406,7 @@ describe("PATCH /jobs/:id", function () {
     expect(resp.statusCode).toEqual(400);
   });
 
-  test("bad request on company handle change attempt", async function () {
+  test("bad request on company handle change attempt: admin", async function () {
     const resp = await request(app)
         .patch(`/jobs/${jobIds[0]}`)
         .send({
@@ -393,7 +416,7 @@ describe("PATCH /jobs/:id", function () {
     expect(resp.statusCode).toEqual(400);
   });
 
-  test("bad request on invalid data", async function () {
+  test("bad request on invalid data: admin", async function () {
     const resp = await request(app)
         .patch(`/jobs/${jobIds[0]}`)
         .send({
@@ -403,7 +426,24 @@ describe("PATCH /jobs/:id", function () {
     expect(resp.statusCode).toEqual(400);
   });
 
-  // TODO: Add tests for unauth users making bad requests
+  test("unauth on invalid data: non-admin", async function () {
+    const resp = await request(app)
+        .patch(`/jobs/${jobIds[0]}`)
+        .send({
+          salary: "Infinity dollars",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth on invalid data: anon", async function () {
+    const resp = await request(app)
+        .patch(`/jobs/${jobIds[0]}`)
+        .send({
+          salary: "Infinity dollars",
+        });
+    expect(resp.statusCode).toEqual(401);
+  });
 });
 
 /************************************** DELETE /jobs/:handle */
@@ -431,9 +471,16 @@ describe("DELETE /jobs/:id", function () {
 
   test("not found for no such job for admin", async function () {
     const resp = await request(app)
-        .delete('/jobs/nope')
+        .delete('/jobs/-1')
         .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(404);
+  });
+
+  test("bad request for string id for admin", async function () {
+    const resp = await request(app)
+        .delete('/jobs/nope')
+        .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(400);
   });
 
   test("unauth for no such job for non-admin users", async function () {
