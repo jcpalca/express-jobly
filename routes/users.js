@@ -5,8 +5,8 @@
 const jsonschema = require("jsonschema");
 
 const express = require("express");
-const { ensureLoggedIn, 
-        ensureAdmin, 
+const { ensureLoggedIn,
+        ensureAdmin,
         ensureCorrectUserOrAdmin } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
@@ -61,14 +61,14 @@ router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
 
 /** GET /[username] => { user }
  *
- * Returns { username, firstName, lastName, isAdmin }
+ * Returns { username, firstName, lastName, isAdmin, jobs }
  *
  * Authorization required: login
  **/
 
-router.get("/:username", 
-            ensureLoggedIn, 
-            ensureCorrectUserOrAdmin, 
+router.get("/:username",
+            ensureLoggedIn,
+            ensureCorrectUserOrAdmin,
             async function (req, res, next) {
   const user = await User.get(req.params.username);
   return res.json({ user });
@@ -85,8 +85,8 @@ router.get("/:username",
  * Authorization required: login
  **/
 
-router.patch("/:username", 
-              ensureLoggedIn, 
+router.patch("/:username",
+              ensureLoggedIn,
               ensureCorrectUserOrAdmin,
               async function (req, res, next) {
   const validator = jsonschema.validate(
@@ -109,8 +109,8 @@ router.patch("/:username",
  * Authorization required: login
  **/
 
-router.delete("/:username", 
-                ensureLoggedIn, 
+router.delete("/:username",
+                ensureLoggedIn,
                 ensureCorrectUserOrAdmin,
                 async function (req, res, next) {
   await User.remove(req.params.username);
@@ -118,24 +118,23 @@ router.delete("/:username",
 });
 
 /** POST  /users/:username/jobs/:id => { applied: jobId }
- * 
+ *
  * Authorization required: Login. Must be Admin or Correct User
 */
 
-router.post("/:username/jobs/:id", 
-              ensureLoggedIn, 
+router.post("/:username/jobs/:id",
+              ensureLoggedIn,
               ensureCorrectUserOrAdmin,
               async function (req, res, next) {
-  
+
   if (!+req.params.id) throw new BadRequestError(`Invalid id`);
 
   req.params.id = +req.params.id;
-  
+
   await User.apply(req.params.username, req.params.id);
 
-  return res.status(201).json({ applied: req.params.id });
+  return res.json({ applied: req.params.id });
 
 });
 
-//TODO: given way endpoint constructed, 200 would be better. 
 module.exports = router;

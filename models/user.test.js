@@ -141,6 +141,7 @@ describe("get", function () {
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
+      jobs: [jobIds[0]]
     });
   });
 
@@ -237,7 +238,7 @@ describe("apply", function () {
   test("apply works", async function() {
     await User.apply("u1", jobIds[1]);
     const res = await db.query(
-      `SELECT * FROM applications WHERE job_id = $1 AND username = $2`, 
+      `SELECT * FROM applications WHERE job_id = $1 AND username = $2`,
       [jobIds[1], "u1"]
     );
 
@@ -249,13 +250,14 @@ describe("apply", function () {
       }
     ]);
   });
-//TODO: more descriptive with tests. add error messages.
+
   test("fails when fake user", async function() {
     try{
       await User.apply("nope", jobIds[0]);
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
+      expect(err.message).toEqual("No username: nope");
     }
   });
 
@@ -265,6 +267,7 @@ describe("apply", function () {
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
+      expect(err.message).toEqual("No job id: -1");
     }
   });
 
@@ -275,8 +278,9 @@ describe("apply", function () {
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual(`Duplicate application: u1 ${jobIds[1]}`);
     }
   });
 })
 
-//TODO: add jobs {jobIDs } 
+//TODO: add jobs {jobIDs }

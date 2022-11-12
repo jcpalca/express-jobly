@@ -16,7 +16,7 @@ const { BCRYPT_WORK_FACTOR } = require("../config.js");
 class User {
   /** authenticate user with username, password.
    *
-   * Returns { username, first_name, last_name, email, is_admin }
+   * Returns { username, first_name, last_name, email, is_admin, jobs }
    *
    * Throws UnauthorizedError is user not found or wrong password.
    **/
@@ -139,6 +139,15 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
 
+    const applicationRes = await db.query(
+          `SELECT job_id
+              FROM applications
+              WHERE username = $1`,
+              [username]
+    );
+
+    user.jobs = applicationRes.rows.map(r => r.job_id);
+
     return user;
   }
 
@@ -206,14 +215,14 @@ class User {
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
 
-  /** Apply when given username and job_id; Adds application data to database  
-   * Returns NotFoundError when job_id or username does not exist
-   * Returns when successful 
+  /** Apply when given username and jobId; Adds application data to database
+   * Returns NotFoundError when jobId or username does not exist
+   * Returns when successful
    *  {
         username: "u1",
-        job_id: 142,
+        jobId: 142,
       }
-   */ //TODO: camelCase
+   */
 
   static async apply(username, jobId){
 
@@ -222,7 +231,7 @@ class User {
            FROM users
            WHERE username = $1`,
         [username]);
-    
+
     if (!usernameCheck.rows[0])
       throw new NotFoundError(`No username: ${username}`);
 
@@ -232,18 +241,18 @@ class User {
            FROM jobs
            WHERE id = $1`,
         [jobId]);
-    
+
     if (!jobIdCheck.rows[0])
       throw new NotFoundError(`No job id: ${jobId}`);
-      
+
 
     const duplicateCheck = await db.query(
       `SELECT username, job_id
           FROM applications
-          WHERE username = $1 AND job_id = $2`, 
+          WHERE username = $1 AND job_id = $2`,
           [username, jobId] );
-    
-    if(duplicateCheck.rows[0]) 
+
+    if(duplicateCheck.rows[0])
       throw new BadRequestError(`Duplicate application: ${username} ${jobId}`);
 
 
@@ -256,7 +265,7 @@ class User {
           jobId
         ],
     );
-    
+
     const application = result.rows[0];
 
     return application;
