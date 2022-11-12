@@ -208,26 +208,34 @@ class User {
 
   /** Apply when given username and job_id; Adds application data to database  
    * Returns NotFoundError when job_id or username does not exist
+   * Returns when successful 
+   *  {
+        username: "u1",
+        job_id: 142,
+      }
    */
 
   static async apply(username, jobId){
+
     const usernameCheck = await db.query(
         `SELECT username
            FROM users
            WHERE username = $1`,
         [username]);
-
+    
     if (!usernameCheck.rows[0])
       throw new NotFoundError(`No username: ${username}`);
+
 
     const jobIdCheck = await db.query(
         `SELECT id
            FROM jobs
            WHERE id = $1`,
         [jobId]);
-
+    
     if (!jobIdCheck.rows[0])
       throw new NotFoundError(`No job id: ${jobId}`);
+      
 
     const duplicateCheck = await db.query(
       `SELECT username, job_id
@@ -235,9 +243,9 @@ class User {
           WHERE username = $1 AND job_id = $2`, 
           [username, jobId] );
     
-    if(duplicateCheck.rows[0]) {
+    if(duplicateCheck.rows[0]) 
       throw new BadRequestError(`Duplicate application: ${username} ${jobId}`);
-    }
+
 
      const result = await db.query(
         `INSERT INTO applications( username, job_id )
@@ -249,13 +257,11 @@ class User {
         ],
     );
     
-    console.log(result.rows[0], "<<<<<<<<<<<<< model user")
     const application = result.rows[0];
 
     return application;
   }
 }
-
 
 
 

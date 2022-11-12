@@ -117,5 +117,25 @@ router.delete("/:username",
   return res.json({ deleted: req.params.username });
 });
 
+/** POST  /users/:username/jobs/:id => { applied: jobId }
+ * 
+ * Authorization required: Login. Must be Admin or Correct User
+*/
+
+router.post("/:username/jobs/:id", 
+              ensureLoggedIn, 
+              ensureCorrectUserOrAdmin,
+              async function (req, res, next) {
+  
+  if (!+req.params.id) throw new BadRequestError(`Invalid id`);
+
+  req.params.id = +req.params.id;
+  
+  await User.apply(req.params.username, req.params.id);
+
+  return res.status(201).json({ applied: req.params.id });
+
+});
+
 
 module.exports = router;
