@@ -12,6 +12,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  jobIds
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -234,19 +235,17 @@ describe("remove", function () {
 
 describe("apply", function () {
   test("apply works", async function() {
-    await User.apply("u3", jobIds[0]);
+    await User.apply("u1", jobIds[1]);
     const res = await db.query(
-      `SELECT * FROM applications WHERE job_id = $1`, [jobIds[0]]
+      `SELECT * FROM applications WHERE job_id = $1 AND username = $2`, 
+      [jobIds[1], "u1"]
     );
-    expect(res.rows.length).toEqual(2)
+
+    expect(res.rows.length).toEqual(1)
     expect(res.rows).toEqual([
       {
         username: "u1",
-        job_id: jobIds[0],
-      },
-      {
-        username: "u3",
-        job_id: jobIds[0],
+        job_id: jobIds[1],
       }
     ]);
   });
@@ -269,5 +268,13 @@ describe("apply", function () {
     }
   });
 
-
+  test("fails when duplicate application", async function () {
+    try{
+      await User.apply("u1", jobIds[1]);
+      await User.apply("u1", jobIds[1]);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
 })
