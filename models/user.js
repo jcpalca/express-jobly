@@ -213,7 +213,7 @@ class User {
         username: "u1",
         job_id: 142,
       }
-   */
+   */ //TODO: camelCase
 
   static async apply(username, jobId){
 

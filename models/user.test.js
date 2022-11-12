@@ -249,7 +249,7 @@ describe("apply", function () {
       }
     ]);
   });
-
+//TODO: more descriptive with tests. add error messages.
   test("fails when fake user", async function() {
     try{
       await User.apply("nope", jobIds[0]);
@@ -278,3 +278,5 @@ describe("apply", function () {
     }
   });
 })
+
+//TODO: add jobs {jobIDs } 
