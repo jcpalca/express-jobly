@@ -205,7 +205,58 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
+
+  /** Apply when given username and job_id; Adds application data to database  
+   * Returns NotFoundError when job_id or username does not exist
+   */
+
+  static async apply(username, jobId){
+    const usernameCheck = await db.query(
+        `SELECT username
+           FROM users
+           WHERE username = $1`,
+        [username]);
+
+    if (!usernameCheck.rows[0])
+      throw new NotFoundError(`No username: ${username}`);
+
+    const jobIdCheck = await db.query(
+        `SELECT id
+           FROM jobs
+           WHERE id = $1`,
+        [jobId]);
+
+    if (!jobIdCheck.rows[0])
+      throw new NotFoundError(`No job id: ${jobId}`);
+
+    const duplicateCheck = await db.query(
+      `SELECT username, job_id
+          FROM applications
+          WHERE username = $1 AND job_id = $2`, 
+          [username, jobId] );
+    
+    if(duplicateCheck.rows[0]) {
+      throw new BadRequestError(`Duplicate application: ${username} ${jobId}`);
+    }
+
+     const result = await db.query(
+        `INSERT INTO applications( username, job_id )
+           VALUES ($1, $2)
+           RETURNING username, job_id AS "jobId"`,
+        [
+          username,
+          jobId
+        ],
+    );
+    
+    console.log(result.rows[0], "<<<<<<<<<<<<< model user")
+    const application = result.rows[0];
+
+    return application;
+  }
 }
+
+
 
 
 module.exports = User;
